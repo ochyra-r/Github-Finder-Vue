@@ -7,14 +7,10 @@
             <b-form-input
               v-model="query"
               placeholder="Search for users and repositories"
+              v-on:keyup.enter="fetchData"
             ></b-form-input>
             <b-input-group-append>
-              <b-button
-                variant="info"
-                v-on:click="fetchData"
-                v-on:keypress="fetchData"
-                >Button</b-button
-              >
+              <b-button variant="info" v-on:click="fetchData">Search</b-button>
             </b-input-group-append>
           </b-input-group>
         </b-col>
@@ -24,40 +20,77 @@
           <b-card no-body>
             <b-tabs card>
               <b-tab title="Users" active>
-                <!-- <b-card-text>Tab contents 1</b-card-text> -->
-                <div class="overflow-auto pt-3">
-                  <b-pagination
-                    v-model="currentPage"
-                    :total-rows="rows"
-                    :per-page="perPage"
-                    aria-controls="my-table"
-                    v-on:page-click="handleClick"
-                  ></b-pagination>
-
-                  <p class="mt-3">Current Page: {{ currentPage }}</p>
-
-                  <ul>
-                    <li v-for="user in users" v-bind:key="user.id">
-                      {{ user.login }}
+                <div class="overflow-auto">
+                  <div class="list-total-results ml-4">
+                    {{ totalUsers }} users
+                  </div>
+                  <ul class="results-list px-2 mb-5">
+                    <li
+                      v-for="user in users"
+                      v-bind:key="user.id"
+                      class="results-list__item px-3 py-4 d-flex align-items-center"
+                    >
+                      <img
+                        :src="user.avatar_url"
+                        alt="avatar"
+                        class="results-list__user-img mr-3"
+                      />
+                      <div class="results-list__user-login">
+                        {{ user.login }}
+                      </div>
                     </li>
                   </ul>
-
-                  <!-- <b-table
-                    id="my-table"
-                    :items="users"
-                    :per-page="perPage"
-                    :current-page="currentPage"
-                    :fields="fields"
-                    small
-                  >
-                    <template #cell(main)="data">
-                      {{ data.item.login }}
-                    </template>
-                  </b-table> -->
+                  <b-pagination
+                    v-model="currentPage.user"
+                    :total-rows="userRows"
+                    :per-page="perPage.user"
+                    v-on:page-click="userPageChange"
+                    align="center"
+                  ></b-pagination>
                 </div>
               </b-tab>
               <b-tab title="Repositories">
-                <!-- <b-card-text>Tab contents 2</b-card-text> -->
+                <div class="overflow-auto">
+                  <div class="list-total-results ml-4">
+                    {{ totalRepos }} repository results
+                  </div>
+                  <ul class="results-list px-2 mb-5">
+                    <li
+                      v-for="repo in repos"
+                      v-bind:key="repo.id"
+                      class="results-list__item px-3 py-4"
+                    >
+                      <p class="results-list__repo-name mb-0">
+                        &#x1F4D6; {{ repo.full_name }}
+                      </p>
+                      <p
+                        class="results-list__repo-desc mb-0"
+                        v-if="repo.description"
+                      >
+                        {{ repo.description }}
+                      </p>
+                      <p
+                        class="results-list__repo-lng text-muted mt-1 d-inline"
+                      >
+                        <b-badge pill variant="success">{{
+                          repo.language
+                        }}</b-badge>
+                      </p>
+                      <p
+                        class="results-list__repo-update text-muted mt-1 d-inline"
+                      >
+                        updated on {{ repo.updated_at | formatDate }}
+                      </p>
+                    </li>
+                  </ul>
+                  <b-pagination
+                    v-model="currentPage.repo"
+                    :total-rows="repoRows"
+                    :per-page="perPage.repo"
+                    v-on:page-click="repoPageChange"
+                    align="center"
+                  ></b-pagination>
+                </div>
               </b-tab>
             </b-tabs>
           </b-card>
@@ -82,26 +115,45 @@ export default Vue.extend({
       users: [],
       totalUsers: 0 as number,
       repos: [],
-      perPage: 10,
-      currentPage: 1,
-      page: 1,
-      // fields: ["main"],
+      totalRepos: 0 as number,
+      perPage: {
+        user: 10 as number,
+        repo: 10 as number,
+      },
+      currentPage: {
+        user: 1 as number,
+        repo: 1 as number,
+      },
+      page: {
+        user: 1 as number,
+        repo: 1 as number,
+      },
     };
   },
   computed: {
-    rows: function(): unknown {
+    userRows: function(): unknown {
       return this.totalUsers;
+    },
+    repoRows: function(): unknown {
+      return this.totalRepos;
     },
   },
   methods: {
-    handleClick: function(
+    userPageChange: function(
       bvEvt: EventListenerOrEventListenerObject,
       page: number
     ) {
-      console.log(bvEvt, page);
-      this.page = page;
+      this.page.user = page;
       this.users = [];
       this.fetchUsers();
+    },
+    repoPageChange: function(
+      bvEvt: EventListenerOrEventListenerObject,
+      page: number
+    ) {
+      this.page.repo = page;
+      this.repos = [];
+      this.fetchRepos();
     },
     fetchData: function(): void {
       this.fetchUsers();
@@ -110,14 +162,14 @@ export default Vue.extend({
     fetchUsers() {
       this.$http
         .get(
-          `https://api.github.com/search/users?q=${this.query}&page=${this.page}&per_page=${this.perPage}`
+          `https://api.github.com/search/users?q=${this.query}&page=${this.page.user}&per_page=${this.perPage.user}`
         )
         .then((response) => response.json())
         .then(
           (data) => {
             this.users = data.items;
             this.totalUsers = data.total_count;
-            console.log(data);
+            // console.log(data);
           },
           (error) => console.log(error)
         );
@@ -125,12 +177,13 @@ export default Vue.extend({
     fetchRepos() {
       this.$http
         .get(
-          `https://api.github.com/search/repositories?q=${this.query}&page=1&per_page=10`
+          `https://api.github.com/search/repositories?q=${this.query}&page=${this.page.repo}&per_page=${this.perPage.repo}`
         )
         .then((response) => response.json())
         .then(
           (data) => {
             this.repos = data.items;
+            this.totalRepos = data.total_count;
             // console.log(data.items);
           },
           (error) => console.log(error)
@@ -139,3 +192,27 @@ export default Vue.extend({
   },
 });
 </script>
+
+<style lang="sass">
+.results-list
+  list-style: none
+  &__item
+    border-bottom: 1px solid #ddd
+  &__user
+    &-img
+      border-radius: 6px
+      width: 50px
+      height: 50px
+    &-login
+      font-size: 1.6rem
+  &__repo
+    &-name
+      font-size: 1.4rem
+    &-desc
+      font-size: 1.1rem
+    &-update, &-lng
+      font-size: 0.8rem
+
+.list-total-results
+  font-size: 2rem
+</style>

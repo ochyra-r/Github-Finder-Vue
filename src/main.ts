@@ -10,6 +10,12 @@ Vue.use(VueResurce);
 
 Vue.config.productionTip = false;
 
+Vue.filter("formatDate", function(value: string) {
+  if (value) {
+    return new Date(value).toDateString();
+  }
+});
+
 new Vue({
   router,
   render: (h) => h(App),

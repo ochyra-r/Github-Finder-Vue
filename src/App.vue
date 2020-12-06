@@ -11,8 +11,13 @@
         </b-row>
       </b-container>
     </b-container>
-
-    <router-view />
+    <b-container class="router-view">
+      <b-row>
+        <b-col>
+          <router-view />
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
 </template>
 
