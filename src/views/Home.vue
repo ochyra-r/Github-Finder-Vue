@@ -93,7 +93,6 @@
                       </b-dropdown>
                     </div>
                   </div>
-
                   <ul class="results-list px-2 mb-5">
                     <li
                       v-for="user in users"
@@ -114,6 +113,9 @@
                       </router-link>
                     </li>
                   </ul>
+                  <div v-if="userError.isError" class="error-msg">
+                    <b-alert show variant="danger">{{ userError.msg }}</b-alert>
+                  </div>
                   <b-pagination
                     v-model="currentPage.user"
                     :total-rows="userRows"
@@ -219,6 +221,9 @@
                       </p>
                     </li>
                   </ul>
+                  <div v-if="repoError.isError" class="error-msg">
+                    <b-alert show variant="danger">{{ repoError.msg }}</b-alert>
+                  </div>
                   <b-pagination
                     v-model="currentPage.repo"
                     :total-rows="repoRows"
@@ -276,6 +281,14 @@ export default Vue.extend({
       isLoading: {
         users: false,
         repos: false,
+      },
+      userError: {
+        isError: false as boolean,
+        msg: "" as string,
+      },
+      repoError: {
+        isError: false as boolean,
+        msg: "" as string,
       },
     };
   },
@@ -335,11 +348,18 @@ export default Vue.extend({
           (data) => {
             this.isLoading.users = false;
             this.isFetched = true;
+            this.userError.isError = false;
             this.users = data.items;
             this.totalUsers = data.total_count;
             // console.log(data);
           },
-          (error) => console.log(error)
+          (error) => {
+            // console.log(error);
+            this.isLoading.users = false;
+            this.isFetched = true;
+            this.userError.isError = true;
+            this.userError.msg = error.body.message;
+          }
         );
     },
     fetchRepos() {
@@ -353,11 +373,18 @@ export default Vue.extend({
           (data) => {
             this.isLoading.repos = false;
             this.isFetched = true;
+            this.repoError.isError = false;
             this.repos = data.items;
             this.totalRepos = data.total_count;
             // console.log(data.items);
           },
-          (error) => console.log(error)
+          (error) => {
+            // console.log(error);
+            this.isLoading.repos = false;
+            this.isFetched = true;
+            this.repoError.isError = true;
+            this.repoError.msg = error.body.message;
+          }
         );
     },
   },
@@ -386,4 +413,8 @@ export default Vue.extend({
 
 .list-total-results
   font-size: 2rem
+
+.error-msg
+  text-align: center
+  margin-bottom: 2rem
 </style>

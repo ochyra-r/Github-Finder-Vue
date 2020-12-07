@@ -3,6 +3,7 @@ import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
 import User from "../views/User.vue";
 import Repository from "../views/Repository.vue";
+import NotFound from "../views/NotFound.vue";
 
 Vue.use(VueRouter);
 
@@ -21,6 +22,11 @@ const routes: Array<RouteConfig> = [
     path: "/repository/:owner/:repo",
     name: "Repository",
     component: Repository,
+  },
+  {
+    path: "*",
+    name: "NotFound",
+    component: NotFound,
   },
 ];
 
