@@ -86,7 +86,6 @@ export default Vue.extend({
         .then(
           (data) => {
             this.repos = data;
-            console.log(data);
           },
           (error) => console.log(error)
         );
