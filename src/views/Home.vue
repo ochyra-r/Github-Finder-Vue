@@ -30,14 +30,18 @@
                       v-bind:key="user.id"
                       class="results-list__item px-3 py-4 d-flex align-items-center"
                     >
-                      <img
-                        :src="user.avatar_url"
-                        alt="avatar"
-                        class="results-list__user-img mr-3"
-                      />
-                      <div class="results-list__user-login">
-                        {{ user.login }}
-                      </div>
+                      <router-link v-bind:to="'/user/' + user.login">
+                        <img
+                          :src="user.avatar_url"
+                          alt="avatar"
+                          class="results-list__user-img mr-3"
+                        />
+                      </router-link>
+                      <router-link v-bind:to="'/user/' + user.login">
+                        <div class="results-list__user-login">
+                          {{ user.login }}
+                        </div>
+                      </router-link>
                     </li>
                   </ul>
                   <b-pagination
@@ -81,6 +85,12 @@
                       >
                         updated on {{ repo.updated_at | formatDate }}
                       </p>
+                      <router-link
+                        v-bind:to="
+                          '/repository/' + repo.owner.login + '/' + repo.name
+                        "
+                        >Go to repo</router-link
+                      >
                     </li>
                   </ul>
                   <b-pagination
