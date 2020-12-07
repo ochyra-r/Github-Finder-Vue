@@ -29,7 +29,22 @@
                     v-bind:key="commit.sha"
                     class="repo-list__item"
                   >
-                    {{ commit.commit.message }}
+                    <h5 class="repo-list__item-message">
+                      {{ commit.commit.message | getMessage }}
+                    </h5>
+                    <div class="repo-list__item-info">
+                      <img
+                        :src="commit.author.avatar_url"
+                        alt="avatar"
+                        class="mr-2"
+                      />
+                      <span class="mr-4">{{ commit.author.login }}</span>
+                      <span class="text-muted"
+                        >comitted:
+                        {{ commit.commit.author.date | formatDateHour }}
+                        {{ commit.commit.author.date | formatDate }}</span
+                      >
+                    </div>
                   </b-list-group-item>
                 </b-list-group>
               </b-tab>
@@ -92,8 +107,8 @@ export default Vue.extend({
         contributors: 1,
       },
       perPage: {
-        commits: 10,
-        contributors: 10,
+        commits: 100,
+        contributors: 100,
       },
     };
   },
@@ -122,7 +137,6 @@ export default Vue.extend({
         .then(
           (data) => {
             this.commits = data;
-            console.log(data);
           },
           (error) => console.log(error)
         );
@@ -177,4 +191,13 @@ export default Vue.extend({
         &__info
           .name
             font-size: 1.4rem
+
+.repository-content__commits
+  &-list
+    .repo-list__item
+      &-info
+        img
+          width: 40px
+          height: 40px
+          border-radius: 50%
 </style>

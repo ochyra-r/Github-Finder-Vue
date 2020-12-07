@@ -16,6 +16,18 @@ Vue.filter("formatDate", function(value: string) {
   }
 });
 
+Vue.filter("formatDateHour", function(value: string) {
+  if (value) {
+    return new Date(value).toLocaleTimeString();
+  }
+});
+
+Vue.filter("getMessage", function(value: string) {
+  if (value) {
+    return value.split("\n\n")[0];
+  }
+});
+
 new Vue({
   router,
   render: (h) => h(App),

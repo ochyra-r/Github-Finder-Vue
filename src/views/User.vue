@@ -20,7 +20,7 @@
         </b-col>
       </b-row>
       <b-row class="flex-column mb-5">
-        <h3>Repositories {{ user.public_repos }}</h3>
+        <h3>Repositories: {{ user.public_repos }}</h3>
         <b-list-group class="repo-list">
           <b-list-group-item
             v-for="repo in repos"
@@ -58,6 +58,14 @@
             </p>
           </b-list-group-item>
         </b-list-group>
+        <b-pagination
+          v-model="currentPage"
+          :total-rows="totalRows"
+          :per-page="perPage"
+          v-on:page-click="userReposChange"
+          align="center"
+          class="mt-4"
+        ></b-pagination>
       </b-row>
     </b-container>
   </div>
@@ -71,11 +79,13 @@ export default Vue.extend({
   data() {
     return {
       login: this.$route.params.login,
+      repoURL: "",
       user: {},
       repos: [],
       totalRepos: 0 as number,
+      currentPage: 1,
       page: 1,
-      perPage: 10,
+      perPage: 20,
     };
   },
   methods: {
@@ -90,6 +100,19 @@ export default Vue.extend({
           (error) => console.log(error)
         );
     },
+    userReposChange: function(
+      bvEvt: EventListenerOrEventListenerObject,
+      page: number
+    ) {
+      this.page = page;
+      this.repos = [];
+      this.fetchRepos(this.repoURL);
+    },
+  },
+  computed: {
+    totalRows: function(): unknown {
+      return this.totalRepos;
+    },
   },
   created() {
     this.$http
@@ -98,6 +121,8 @@ export default Vue.extend({
       .then(
         (data) => {
           this.user = data;
+          this.repoURL = data.repos_url;
+          this.totalRepos = data.public_repos;
           this.fetchRepos(data.repos_url);
         },
         (error) => console.log(error)

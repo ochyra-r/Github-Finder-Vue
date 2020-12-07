@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <b-container class="bv-example-row">
+    <b-container class="bv-example-row px-0">
       <b-row>
         <b-col>
           <b-input-group class="">
