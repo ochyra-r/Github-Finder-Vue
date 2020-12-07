@@ -116,18 +116,73 @@
               </b-tab>
               <b-tab title="Repositories">
                 <div class="overflow-auto">
-                  <div class="list-total-results ml-4">
-                    {{ totalRepos }} repository results
+                  <div class="d-flex justify-content-between">
+                    <div class="list-total-results ml-4">
+                      {{ totalRepos }} repository results
+                    </div>
+                    <div class="list-total-filters">
+                      <b-dropdown
+                        id="dropdown-right"
+                        right
+                        v-bind:text="'Sort: ' + sort.repo.sortBy"
+                        variant="light"
+                        class="m-2"
+                      >
+                        <b-dropdown-item
+                          v-on:click="sortRepos('Best match', 'desc', '')"
+                          >Best match</b-dropdown-item
+                        >
+                        <b-dropdown-item
+                          v-on:click="sortRepos('Most stars', 'desc', 'stars')"
+                          >Most stars</b-dropdown-item
+                        >
+                        <b-dropdown-item
+                          v-on:click="sortRepos('Fewest stars', 'asc', 'stars')"
+                          >Fewest stars</b-dropdown-item
+                        >
+                        <b-dropdown-item
+                          v-on:click="sortRepos('Most forks', 'desc', 'forks')"
+                          >Most forks</b-dropdown-item
+                        >
+                        <b-dropdown-item
+                          v-on:click="sortRepos('Fewest forks', 'asc', 'forks')"
+                          >Fewest forks</b-dropdown-item
+                        >
+                        <b-dropdown-item
+                          v-on:click="
+                            sortRepos('Recently updated', 'desc', 'updated')
+                          "
+                          >Recently updated</b-dropdown-item
+                        >
+                        <b-dropdown-item
+                          v-on:click="
+                            sortRepos(
+                              'Least recently updated',
+                              'asc',
+                              'updated'
+                            )
+                          "
+                          >Least recently updated</b-dropdown-item
+                        >
+                      </b-dropdown>
+                    </div>
                   </div>
+
                   <ul class="results-list px-2 mb-5">
                     <li
                       v-for="repo in repos"
                       v-bind:key="repo.id"
                       class="results-list__item px-3 py-4"
                     >
-                      <p class="results-list__repo-name mb-0">
-                        &#x1F4D6; {{ repo.full_name }}
-                      </p>
+                      <router-link
+                        v-bind:to="
+                          '/repository/' + repo.owner.login + '/' + repo.name
+                        "
+                      >
+                        <p class="results-list__repo-name mb-0">
+                          &#x1F4D6; {{ repo.full_name }}
+                        </p>
+                      </router-link>
                       <p
                         class="results-list__repo-desc mb-0"
                         v-if="repo.description"
@@ -146,12 +201,6 @@
                       >
                         updated on {{ repo.updated_at | formatDate }}
                       </p>
-                      <router-link
-                        v-bind:to="
-                          '/repository/' + repo.owner.login + '/' + repo.name
-                        "
-                        >Go to repo</router-link
-                      >
                     </li>
                   </ul>
                   <b-pagination
@@ -223,12 +272,18 @@ export default Vue.extend({
   },
   methods: {
     sortUsers: function(name: string, order: string, sort: string) {
-      // console.log(name, order, sort);
       this.sort.user.sortBy = name;
       this.sort.user.order = order;
       this.sort.user.sort = sort;
       this.users = [];
       this.fetchUsers();
+    },
+    sortRepos: function(name: string, order: string, sort: string) {
+      this.sort.repo.sortBy = name;
+      this.sort.repo.order = order;
+      this.sort.repo.sort = sort;
+      this.repos = [];
+      this.fetchRepos();
     },
     userPageChange: function(
       bvEvt: EventListenerOrEventListenerObject,
@@ -268,7 +323,7 @@ export default Vue.extend({
     fetchRepos() {
       this.$http
         .get(
-          `https://api.github.com/search/repositories?q=${this.query}&page=${this.page.repo}&per_page=${this.perPage.repo}`
+          `https://api.github.com/search/repositories?q=${this.query}&page=${this.page.repo}&per_page=${this.perPage.repo}&order=${this.sort.repo.order}&sort=${this.sort.repo.sort}`
         )
         .then((response) => response.json())
         .then(
