@@ -5,7 +5,7 @@
         <b-row>
           <b-col>
             <div id="nav">
-              <router-link to="/">Home</router-link>
+              <router-link to="/">GH Finder</router-link>
             </div>
           </b-col>
         </b-row>

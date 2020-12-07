@@ -10,7 +10,9 @@
               v-on:keyup.enter="fetchData"
             ></b-form-input>
             <b-input-group-append>
-              <b-button variant="info" v-on:click="fetchData">Search</b-button>
+              <b-button variant="primary" v-on:click="fetchData"
+                >Search</b-button
+              >
             </b-input-group-append>
           </b-input-group>
         </b-col>
@@ -20,7 +22,14 @@
           <b-card no-body>
             <b-tabs card>
               <b-tab title="Users" active>
-                <div class="overflow-auto">
+                <div v-if="isLoading.users" class="text-center">
+                  <b-spinner
+                    style="width: 3rem; height: 3rem;"
+                    label="Large Spinner"
+                    type="grow"
+                  ></b-spinner>
+                </div>
+                <div v-if="isFetched" class="overflow-auto">
                   <div class="d-flex justify-content-between">
                     <div class="list-total-results ml-4">
                       {{ totalUsers }} users
@@ -115,7 +124,14 @@
                 </div>
               </b-tab>
               <b-tab title="Repositories">
-                <div class="overflow-auto">
+                <div v-if="isLoading.repos" class="text-center">
+                  <b-spinner
+                    style="width: 3rem; height: 3rem;"
+                    label="Large Spinner"
+                    type="grow"
+                  ></b-spinner>
+                </div>
+                <div v-if="isFetched" class="overflow-auto">
                   <div class="d-flex justify-content-between">
                     <div class="list-total-results ml-4">
                       {{ totalRepos }} repository results
@@ -222,13 +238,9 @@
 
 <script lang="ts">
 import Vue from "vue";
-// import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
 
 export default Vue.extend({
   name: "Home",
-  components: {
-    // HelloWorld,
-  },
   data() {
     return {
       query: "" as string,
@@ -259,6 +271,11 @@ export default Vue.extend({
           order: "desc" as string,
           sort: "" as string,
         },
+      },
+      isFetched: false as boolean,
+      isLoading: {
+        users: false,
+        repos: false,
       },
     };
   },
@@ -302,10 +319,13 @@ export default Vue.extend({
       this.fetchRepos();
     },
     fetchData: function(): void {
-      this.fetchUsers();
-      this.fetchRepos();
+      if (this.query) {
+        this.fetchUsers();
+        this.fetchRepos();
+      }
     },
     fetchUsers() {
+      this.isLoading.users = true;
       this.$http
         .get(
           `https://api.github.com/search/users?q=${this.query}&page=${this.page.user}&per_page=${this.perPage.user}&order=${this.sort.user.order}&sort=${this.sort.user.sort}`
@@ -313,6 +333,8 @@ export default Vue.extend({
         .then((response) => response.json())
         .then(
           (data) => {
+            this.isLoading.users = false;
+            this.isFetched = true;
             this.users = data.items;
             this.totalUsers = data.total_count;
             // console.log(data);
@@ -321,6 +343,7 @@ export default Vue.extend({
         );
     },
     fetchRepos() {
+      this.isLoading.repos = true;
       this.$http
         .get(
           `https://api.github.com/search/repositories?q=${this.query}&page=${this.page.repo}&per_page=${this.perPage.repo}&order=${this.sort.repo.order}&sort=${this.sort.repo.sort}`
@@ -328,6 +351,8 @@ export default Vue.extend({
         .then((response) => response.json())
         .then(
           (data) => {
+            this.isLoading.repos = false;
+            this.isFetched = true;
             this.repos = data.items;
             this.totalRepos = data.total_count;
             // console.log(data.items);
