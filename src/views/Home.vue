@@ -21,9 +21,70 @@
             <b-tabs card>
               <b-tab title="Users" active>
                 <div class="overflow-auto">
-                  <div class="list-total-results ml-4">
-                    {{ totalUsers }} users
+                  <div class="d-flex justify-content-between">
+                    <div class="list-total-results ml-4">
+                      {{ totalUsers }} users
+                    </div>
+                    <div class="list-total-filters">
+                      <b-dropdown
+                        id="dropdown-right"
+                        right
+                        v-bind:text="'Sort: ' + sort.user.sortBy"
+                        variant="light"
+                        class="m-2"
+                      >
+                        <b-dropdown-item
+                          v-on:click="sortUsers('Best match', 'desc', '')"
+                          >Best match</b-dropdown-item
+                        >
+                        <b-dropdown-item
+                          v-on:click="
+                            sortUsers(
+                              'Most repositories',
+                              'desc',
+                              'repositories'
+                            )
+                          "
+                          >Most repositories</b-dropdown-item
+                        >
+                        <b-dropdown-item
+                          v-on:click="
+                            sortUsers(
+                              'Fewest repositories',
+                              'asc',
+                              'repositories'
+                            )
+                          "
+                          >Fewest repositories</b-dropdown-item
+                        >
+                        <b-dropdown-item
+                          v-on:click="
+                            sortUsers('Most followers', 'desc', 'followers')
+                          "
+                          >Most followers</b-dropdown-item
+                        >
+                        <b-dropdown-item
+                          v-on:click="
+                            sortUsers('Fewest followers', 'asc', 'followers')
+                          "
+                          >Fewest followers</b-dropdown-item
+                        >
+                        <b-dropdown-item
+                          v-on:click="
+                            sortUsers('Most recently joined', 'desc', 'joined')
+                          "
+                          >Most recently joined</b-dropdown-item
+                        >
+                        <b-dropdown-item
+                          v-on:click="
+                            sortUsers('Least recently joined', 'asc', 'joined')
+                          "
+                          >Least recently joined</b-dropdown-item
+                        >
+                      </b-dropdown>
+                    </div>
                   </div>
+
                   <ul class="results-list px-2 mb-5">
                     <li
                       v-for="user in users"
@@ -138,6 +199,18 @@ export default Vue.extend({
         user: 1 as number,
         repo: 1 as number,
       },
+      sort: {
+        user: {
+          sortBy: "Best match" as string,
+          order: "desc" as string,
+          sort: "" as string,
+        },
+        repo: {
+          sortBy: "Best match" as string,
+          order: "desc" as string,
+          sort: "" as string,
+        },
+      },
     };
   },
   computed: {
@@ -149,6 +222,14 @@ export default Vue.extend({
     },
   },
   methods: {
+    sortUsers: function(name: string, order: string, sort: string) {
+      // console.log(name, order, sort);
+      this.sort.user.sortBy = name;
+      this.sort.user.order = order;
+      this.sort.user.sort = sort;
+      this.users = [];
+      this.fetchUsers();
+    },
     userPageChange: function(
       bvEvt: EventListenerOrEventListenerObject,
       page: number
@@ -172,7 +253,7 @@ export default Vue.extend({
     fetchUsers() {
       this.$http
         .get(
-          `https://api.github.com/search/users?q=${this.query}&page=${this.page.user}&per_page=${this.perPage.user}`
+          `https://api.github.com/search/users?q=${this.query}&page=${this.page.user}&per_page=${this.perPage.user}&order=${this.sort.user.order}&sort=${this.sort.user.sort}`
         )
         .then((response) => response.json())
         .then(
