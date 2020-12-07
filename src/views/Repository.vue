@@ -95,20 +95,20 @@ export default Vue.extend({
   data() {
     return {
       params: {
-        owner: this.$route.params.owner,
-        repo: this.$route.params.repo,
+        owner: this.$route.params.owner as string,
+        repo: this.$route.params.repo as string,
       },
-      repo: {},
-      owner: {},
-      contributors: [],
-      commits: [],
+      repo: {} as object,
+      owner: {} as object,
+      contributors: [] as Array<object>,
+      commits: [] as Array<object>,
       page: {
-        commits: 1,
-        contributors: 1,
+        commits: 1 as number,
+        contributors: 1 as number,
       },
       perPage: {
-        commits: 100,
-        contributors: 100,
+        commits: 100 as number,
+        contributors: 100 as number,
       },
     };
   },

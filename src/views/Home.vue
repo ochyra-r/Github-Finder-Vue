@@ -18,7 +18,7 @@
         </b-col>
       </b-row>
       <b-row>
-        <b-col class="mt-5">
+        <b-col class="mt-5 mb-5">
           <b-card no-body>
             <b-tabs card>
               <b-tab title="Users" active>
@@ -249,7 +249,7 @@ export default Vue.extend({
   data() {
     return {
       query: "" as string,
-      users: [],
+      users: [] as Array<object>,
       totalUsers: 0 as number,
       repos: [],
       totalRepos: 0 as number,
@@ -279,8 +279,8 @@ export default Vue.extend({
       },
       isFetched: false as boolean,
       isLoading: {
-        users: false,
-        repos: false,
+        users: false as boolean,
+        repos: false as boolean,
       },
       userError: {
         isError: false as boolean,
@@ -293,22 +293,22 @@ export default Vue.extend({
     };
   },
   computed: {
-    userRows: function(): unknown {
+    userRows: function(): number {
       return this.totalUsers;
     },
-    repoRows: function(): unknown {
+    repoRows: function(): number {
       return this.totalRepos;
     },
   },
   methods: {
-    sortUsers: function(name: string, order: string, sort: string) {
+    sortUsers: function(name: string, order: string, sort: string): void {
       this.sort.user.sortBy = name;
       this.sort.user.order = order;
       this.sort.user.sort = sort;
       this.users = [];
       this.fetchUsers();
     },
-    sortRepos: function(name: string, order: string, sort: string) {
+    sortRepos: function(name: string, order: string, sort: string): void {
       this.sort.repo.sortBy = name;
       this.sort.repo.order = order;
       this.sort.repo.sort = sort;
@@ -318,7 +318,7 @@ export default Vue.extend({
     userPageChange: function(
       bvEvt: EventListenerOrEventListenerObject,
       page: number
-    ) {
+    ): void {
       this.page.user = page;
       this.users = [];
       this.fetchUsers();
@@ -326,7 +326,7 @@ export default Vue.extend({
     repoPageChange: function(
       bvEvt: EventListenerOrEventListenerObject,
       page: number
-    ) {
+    ): void {
       this.page.repo = page;
       this.repos = [];
       this.fetchRepos();
@@ -337,7 +337,7 @@ export default Vue.extend({
         this.fetchRepos();
       }
     },
-    fetchUsers() {
+    fetchUsers(): void {
       this.isLoading.users = true;
       this.$http
         .get(
@@ -362,7 +362,7 @@ export default Vue.extend({
           }
         );
     },
-    fetchRepos() {
+    fetchRepos(): void {
       this.isLoading.repos = true;
       this.$http
         .get(

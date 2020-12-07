@@ -78,18 +78,18 @@ export default Vue.extend({
   name: "User",
   data() {
     return {
-      login: this.$route.params.login,
-      repoURL: "",
-      user: {},
-      repos: [],
+      login: this.$route.params.login as string,
+      repoURL: "" as string,
+      user: {} as object,
+      repos: [] as Array<object>,
       totalRepos: 0 as number,
-      currentPage: 1,
-      page: 1,
-      perPage: 20,
+      currentPage: 1 as number,
+      page: 1 as number,
+      perPage: 20 as number,
     };
   },
   methods: {
-    fetchRepos: function(url: string) {
+    fetchRepos: function(url: string): void {
       this.$http
         .get(url + `?page=${this.page}&per_page=${this.perPage}`)
         .then((response) => response.json())
@@ -103,14 +103,14 @@ export default Vue.extend({
     userReposChange: function(
       bvEvt: EventListenerOrEventListenerObject,
       page: number
-    ) {
+    ): void {
       this.page = page;
       this.repos = [];
       this.fetchRepos(this.repoURL);
     },
   },
   computed: {
-    totalRows: function(): unknown {
+    totalRows: function(): number {
       return this.totalRepos;
     },
   },
