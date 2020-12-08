@@ -37,8 +37,11 @@
                         :src="commit.author.avatar_url"
                         alt="avatar"
                         class="mr-2"
+                        v-if="commit.author"
                       />
-                      <span class="mr-4">{{ commit.author.login }}</span>
+                      <span class="mr-4" v-if="commit.author">{{
+                        commit.author.login
+                      }}</span>
                       <span class="text-muted"
                         >comitted:
                         {{ commit.commit.author.date | formatDateHour }}
