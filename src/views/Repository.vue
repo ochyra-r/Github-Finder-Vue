@@ -22,66 +22,8 @@
         <b-col class="px-0">
           <b-card no-body class="repository-content__container">
             <b-tabs card>
-              <b-tab title="Commits" active class="repository-content__commits">
-                <b-list-group class="repository-content__commits-list">
-                  <b-list-group-item
-                    v-for="commit in commits"
-                    v-bind:key="commit.sha"
-                    class="repo-list__item"
-                  >
-                    <h5 class="repo-list__item-message">
-                      {{ commit.commit.message | getMessage }}
-                    </h5>
-                    <div class="repo-list__item-info">
-                      <img
-                        :src="commit.author.avatar_url"
-                        alt="avatar"
-                        class="mr-2"
-                        v-if="commit.author"
-                      />
-                      <span class="mr-4" v-if="commit.author">{{
-                        commit.author.login
-                      }}</span>
-                      <span class="text-muted"
-                        >comitted:
-                        {{ commit.commit.author.date | formatDateHour }}
-                        {{ commit.commit.author.date | formatDate }}</span
-                      >
-                    </div>
-                  </b-list-group-item>
-                </b-list-group>
-              </b-tab>
-              <b-tab
-                title="Contributors"
-                class="repository-content__contributors justify-content-center"
-              >
-                <div
-                  v-for="contributor in contributors"
-                  v-bind:key="contributor.id"
-                  class="repository-content__contributors-item"
-                >
-                  <b-badge variant="light" class="badge">
-                    <router-link
-                      v-bind:to="'/user/' + contributor.login"
-                      class="badge__link"
-                    >
-                      <img
-                        :src="contributor.avatar_url"
-                        alt="avatar"
-                        class="badge__img"
-                      />
-                      <div
-                        class="badge__info d-flex align-items-center justify-content-center flex-column"
-                      >
-                        <p class="name">{{ contributor.login }}</p>
-                        <p class="contributions text-muted">
-                          Contributions: {{ contributor.contributions }}
-                        </p>
-                      </div>
-                    </router-link>
-                  </b-badge>
-                </div>
-              </b-tab>
+              <Commits v-bind:commits="commits" />
+              <Contributors v-bind:contributors="contributors" />
             </b-tabs>
           </b-card>
         </b-col>
@@ -92,9 +34,15 @@
 
 <script lang="ts">
 import Vue from "vue";
+import Contributors from "../components/Contributors.vue";
+import Commits from "../components/Commits.vue";
 
 export default Vue.extend({
   name: "Repository",
+  components: {
+    Contributors,
+    Commits,
+  },
   data() {
     return {
       params: {
@@ -126,7 +74,6 @@ export default Vue.extend({
         .then(
           (data) => {
             this.contributors = data;
-            // console.log(data);
           },
           (error) => console.log(error)
         );
@@ -159,7 +106,6 @@ export default Vue.extend({
           this.fetchCommits(
             `https://api.github.com/repos/${this.params.owner}/${this.params.repo}/commits`
           );
-          // console.log(data);
         },
         (error) => console.log(error)
       );
@@ -173,27 +119,6 @@ export default Vue.extend({
     border-bottom: 1px solid #ddd
     &__main
       font-size: 2rem
-
-.repository-content
-  &__contributors
-    display: flex
-    flex-wrap: wrap
-    &-item
-      width: auto
-      margin: 1rem
-      .badge
-        border: 1px solid #ddd
-        padding: 1rem
-        &__link
-          display: flex
-        &__img
-          width: 60px
-          height: 60px
-          border-radius: 50%
-          margin-right: 10px
-        &__info
-          .name
-            font-size: 1.4rem
 
 .repository-content__commits
   &-list

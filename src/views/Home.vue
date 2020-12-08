@@ -251,7 +251,7 @@ export default Vue.extend({
       query: "" as string,
       users: [] as Array<object>,
       totalUsers: 0 as number,
-      repos: [],
+      repos: [] as Array<object>,
       totalRepos: 0 as number,
       perPage: {
         user: 10 as number,

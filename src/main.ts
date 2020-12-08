@@ -10,19 +10,19 @@ Vue.use(VueResurce);
 
 Vue.config.productionTip = false;
 
-Vue.filter("formatDate", function(value: string) {
+Vue.filter("formatDate", function(value: string): string | undefined {
   if (value) {
     return new Date(value).toDateString();
   }
 });
 
-Vue.filter("formatDateHour", function(value: string) {
+Vue.filter("formatDateHour", function(value: string): string | undefined {
   if (value) {
     return new Date(value).toLocaleTimeString();
   }
 });
 
-Vue.filter("getMessage", function(value: string) {
+Vue.filter("getMessage", function(value: string): string | undefined {
   if (value) {
     return value.split("\n\n")[0];
   }
