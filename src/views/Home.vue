@@ -93,36 +93,16 @@
                       </b-dropdown>
                     </div>
                   </div>
-                  <ul class="results-list px-2 mb-5">
-                    <li
-                      v-for="user in users"
-                      v-bind:key="user.id"
-                      class="results-list__item px-3 py-4 d-flex align-items-center"
-                    >
-                      <router-link v-bind:to="'/user/' + user.login">
-                        <img
-                          :src="user.avatar_url"
-                          alt="avatar"
-                          class="results-list__user-img mr-3"
-                        />
-                      </router-link>
-                      <router-link v-bind:to="'/user/' + user.login">
-                        <div class="results-list__user-login">
-                          {{ user.login }}
-                        </div>
-                      </router-link>
-                    </li>
-                  </ul>
+                  <Users v-bind:users="users" />
                   <div v-if="userError.isError" class="error-msg">
                     <b-alert show variant="danger">{{ userError.msg }}</b-alert>
                   </div>
-                  <b-pagination
-                    v-model="currentPage.user"
-                    :total-rows="userRows"
-                    :per-page="perPage.user"
-                    v-on:page-click="userPageChange"
-                    align="center"
-                  ></b-pagination>
+                  <Pagination
+                    v-bind:perPage="perPage.user"
+                    v-bind:total="totalUsers"
+                    v-bind:type="paginationType.user"
+                    v-on:changePage="pageChange($event)"
+                  />
                 </div>
               </b-tab>
               <b-tab title="Repositories">
@@ -185,52 +165,16 @@
                       </b-dropdown>
                     </div>
                   </div>
-
-                  <ul class="results-list px-2 mb-5">
-                    <li
-                      v-for="repo in repos"
-                      v-bind:key="repo.id"
-                      class="results-list__item px-3 py-4"
-                    >
-                      <router-link
-                        v-bind:to="
-                          '/repository/' + repo.owner.login + '/' + repo.name
-                        "
-                      >
-                        <p class="results-list__repo-name mb-0">
-                          &#x1F4D6; {{ repo.full_name }}
-                        </p>
-                      </router-link>
-                      <p
-                        class="results-list__repo-desc mb-0"
-                        v-if="repo.description"
-                      >
-                        {{ repo.description }}
-                      </p>
-                      <p
-                        class="results-list__repo-lng text-muted mt-1 d-inline"
-                      >
-                        <b-badge pill variant="success">{{
-                          repo.language
-                        }}</b-badge>
-                      </p>
-                      <p
-                        class="results-list__repo-update text-muted mt-1 d-inline"
-                      >
-                        updated on {{ repo.updated_at | formatDate }}
-                      </p>
-                    </li>
-                  </ul>
+                  <Repositories v-bind:repos="repos" />
                   <div v-if="repoError.isError" class="error-msg">
                     <b-alert show variant="danger">{{ repoError.msg }}</b-alert>
                   </div>
-                  <b-pagination
-                    v-model="currentPage.repo"
-                    :total-rows="repoRows"
-                    :per-page="perPage.repo"
-                    v-on:page-click="repoPageChange"
-                    align="center"
-                  ></b-pagination>
+                  <Pagination
+                    v-bind:perPage="perPage.repo"
+                    v-bind:total="totalRepos"
+                    v-bind:type="paginationType.repo"
+                    v-on:changePage="pageChange($event)"
+                  />
                 </div>
               </b-tab>
             </b-tabs>
@@ -243,9 +187,17 @@
 
 <script lang="ts">
 import Vue from "vue";
+import Repositories from "../components/Repositories.vue";
+import Users from "../components/Users.vue";
+import Pagination from "../components/Pagination.vue";
 
 export default Vue.extend({
   name: "Home",
+  components: {
+    Repositories,
+    Users,
+    Pagination,
+  },
   data() {
     return {
       query: "" as string,
@@ -257,13 +209,13 @@ export default Vue.extend({
         user: 10 as number,
         repo: 10 as number,
       },
-      currentPage: {
-        user: 1 as number,
-        repo: 1 as number,
-      },
       page: {
         user: 1 as number,
         repo: 1 as number,
+      },
+      paginationType: {
+        user: "user" as string,
+        repo: "repo" as string,
       },
       sort: {
         user: {
@@ -292,14 +244,6 @@ export default Vue.extend({
       },
     };
   },
-  computed: {
-    userRows: function(): number {
-      return this.totalUsers;
-    },
-    repoRows: function(): number {
-      return this.totalRepos;
-    },
-  },
   methods: {
     sortUsers: function(name: string, order: string, sort: string): void {
       this.sort.user.sortBy = name;
@@ -315,21 +259,16 @@ export default Vue.extend({
       this.repos = [];
       this.fetchRepos();
     },
-    userPageChange: function(
-      bvEvt: EventListenerOrEventListenerObject,
-      page: number
-    ): void {
-      this.page.user = page;
-      this.users = [];
-      this.fetchUsers();
-    },
-    repoPageChange: function(
-      bvEvt: EventListenerOrEventListenerObject,
-      page: number
-    ): void {
-      this.page.repo = page;
-      this.repos = [];
-      this.fetchRepos();
+    pageChange: function(events: { page: number; type: string }): void {
+      if (events.type === "repo") {
+        this.page.repo = events.page;
+        this.repos = [];
+        this.fetchRepos();
+      } else {
+        this.page.user = events.page;
+        this.users = [];
+        this.fetchUsers();
+      }
     },
     fetchData: function(): void {
       if (this.query) {
@@ -351,10 +290,8 @@ export default Vue.extend({
             this.userError.isError = false;
             this.users = data.items;
             this.totalUsers = data.total_count;
-            // console.log(data);
           },
           (error) => {
-            // console.log(error);
             this.isLoading.users = false;
             this.isFetched = true;
             this.userError.isError = true;
@@ -376,10 +313,8 @@ export default Vue.extend({
             this.repoError.isError = false;
             this.repos = data.items;
             this.totalRepos = data.total_count;
-            // console.log(data.items);
           },
           (error) => {
-            // console.log(error);
             this.isLoading.repos = false;
             this.isFetched = true;
             this.repoError.isError = true;
@@ -392,25 +327,6 @@ export default Vue.extend({
 </script>
 
 <style lang="sass">
-.results-list
-  list-style: none
-  &__item
-    border-bottom: 1px solid #ddd
-  &__user
-    &-img
-      border-radius: 6px
-      width: 50px
-      height: 50px
-    &-login
-      font-size: 1.6rem
-  &__repo
-    &-name
-      font-size: 1.4rem
-    &-desc
-      font-size: 1.1rem
-    &-update, &-lng
-      font-size: 0.8rem
-
 .list-total-results
   font-size: 2rem
 

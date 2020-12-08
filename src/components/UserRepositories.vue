@@ -22,3 +22,8 @@ export default Vue.extend({
   },
 });
 </script>
+
+<style lang="sass" scoped>
+.repo-list
+  width: 100%
+</style>
